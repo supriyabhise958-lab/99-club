@@ -16,70 +16,60 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; user-select: none; }
         body { background-color: var(--bg-dark); color: white; overflow-x: hidden; height: 100vh; display: flex; flex-direction: column; }
 
-        /* --- Auth Screen --- */
+        /* --- Admin Panel --- */
+        #adminPanel { display: none; position: fixed; inset: 0; z-index: 10000; background: #000; padding: 20px; overflow-y: auto; }
+        .req-card { background: #111; border: 1px solid var(--neon-gold); padding: 15px; border-radius: 10px; margin-bottom: 10px; }
+
+        /* --- UI Elements --- */
         #authScreen { position: fixed; inset: 0; z-index: 9999; background: var(--bg-dark); display: flex; align-items: center; justify-content: center; }
         .login-card { width: 90%; max-width: 380px; background: #111; padding: 30px; border-radius: 20px; border: 1px solid #333; text-align: center; box-shadow: 0 0 20px rgba(255, 0, 60, 0.2); }
-        .input-group { position: relative; margin-bottom: 15px; }
-        .input-group i { position: absolute; left: 15px; top: 14px; color: #555; }
-        .input-group input { width: 100%; background: #1a1a1a; border: 1px solid #333; padding: 12px 12px 12px 45px; border-radius: 10px; color: white; outline: none; }
-        
-        /* --- Toolbar --- */
         .toolbar { background: #000; height: 65px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 2px solid var(--neon-red); box-shadow: 0 0 20px var(--neon-red); flex-shrink: 0; }
-        .logo { font-family: 'Orbitron', sans-serif; font-size: 22px; text-shadow: 0 0 10px var(--neon-red); }
+        .logo { font-family: 'Orbitron', sans-serif; font-size: 22px; text-shadow: 0 0 10px var(--neon-red); cursor: pointer; }
         .wallet-card { background: rgba(255,255,255,0.05); padding: 8px 18px; border-radius: 30px; border: 1.5px solid var(--neon-gold); display: flex; align-items: center; gap: 8px; }
 
-        /* --- Game Grid --- */
-        .main-content { flex-grow: 1; overflow-y: auto; padding-bottom: 20px; }
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 15px; max-width: 500px; margin: 0 auto; }
-        .box-unit { display: flex; flex-direction: column; align-items: center; }
-        .box { background: #fff; border: 2.5px solid var(--neon-gold); aspect-ratio: 1/1; width: 100%; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .box { background: #fff; border: 2.5px solid var(--neon-gold); aspect-ratio: 1/1; width: 100%; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
         .box img { width: 75%; }
-        .bet-info { font-size: 13px; font-weight: 700; color: var(--neon-gold); margin-top: 5px; text-align: center; }
-
-        /* --- Panel --- */
+        
         .panel { background: #111; margin: 10px auto; width: 92%; border-radius: 25px; padding: 20px; text-align: center; border: 1px solid #333; flex-shrink: 0; }
         .timer { font-family: 'Orbitron', sans-serif; font-size: 40px; color: var(--neon-gold); margin-bottom: 10px; }
         .btn { width: 100%; padding: 14px; border-radius: 35px; font-weight: 700; text-transform: uppercase; cursor: pointer; border: none; margin-bottom: 8px; font-size: 14px; }
         .btn-start { background: linear-gradient(90deg, #ff003c, #990024); color: white; box-shadow: 0 0 15px var(--neon-red); }
         .btn-dep { background: transparent; color: white; border: 1.5px solid var(--neon-gold); }
 
-        /* --- Sheets --- */
         .sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #0a0a0a; z-index: 6000; border-radius: 30px 30px 0 0; padding: 25px; transition: 0.5s; border-top: 3px solid var(--neon-red); }
         .input-box { width: 100%; background: #1a1a1a; border: 1px solid #444; padding: 15px; border-radius: 12px; color: var(--neon-gold); font-size: 24px; text-align: center; margin-bottom: 15px; outline: none; }
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 7000; }
-        .res-glow { width: 200px; height: 200px; border: 5px solid var(--neon-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px var(--neon-gold); }
     </style>
 </head>
 <body>
 
     <audio id="sndTik" src="https://www.soundjay.com/clock/sounds/clock-ticking-2.mp3"></audio>
     <audio id="sndWon" src="https://www.soundjay.com/human/sounds/applause-01.mp3"></audio>
-    <audio id="sndClick" src="https://www.soundjay.com/buttons/sounds/button-20.mp3"></audio>
+
+    <div id="adminPanel">
+        <h2 style="color:var(--neon-gold); margin-bottom:20px;">Deposit Requests</h2>
+        <div id="adminList">Loading...</div>
+        <button class="btn btn-dep" onclick="closeAdmin()">Back to Game</button>
+    </div>
 
     <div id="authScreen">
         <div class="login-card">
             <div class="logo" style="font-size: 32px; margin-bottom: 25px;">99 CLUB</div>
-            <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="authEmail" placeholder="Email Address"></div>
-            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="authPass" placeholder="Password"></div>
+            <input type="email" id="authEmail" class="input-box" placeholder="Email" style="font-size:16px;">
+            <input type="password" id="authPass" class="input-box" placeholder="Password" style="font-size:16px;">
             <button class="btn btn-start" onclick="handleAuth()">LOGIN / REGISTER</button>
-            <div style="margin: 10px 0; color: #555;">OR</div>
-            <button class="btn-dep" style="width:100%; padding:10px; border-radius:10px;" onclick="handleGoogleAuth()">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="15"> Sign in with Google
-            </button>
+            <button class="btn btn-dep" onclick="handleGoogleAuth()">GOOGLE SIGN IN</button>
         </div>
     </div>
 
     <div id="gameScreen" style="display:none; flex-direction: column; height: 100%;">
         <header class="toolbar">
-            <div class="logo">99 CLUB</div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <div class="wallet-card">₹<span id="balText">0.00</span></div>
-                <i class="fas fa-sign-out-alt" onclick="logout()" style="color:var(--neon-red); font-size: 20px;"></i>
-            </div>
+            <div class="logo" onclick="openAdmin()">99 CLUB</div>
+            <div class="wallet-card">₹<span id="balText">0.00</span></div>
         </header>
 
         <div class="main-content">
-            <div id="userDisplayName" style="text-align:center; padding:10px; color:var(--neon-gold); font-size:12px;">Welcome, User</div>
             <div class="grid" id="gameGrid"></div>
         </div>
 
@@ -90,61 +80,59 @@
         </div>
     </div>
 
+    <div id="depSheet" class="sheet">
+        <h2 style="text-align:center; color:white; margin-bottom:10px;">ADD CASH</h2>
+        <div style="background:white; padding:10px; width:150px; margin:0 auto 15px; border-radius:10px;">
+            <img src="https://i.ibb.co/hJ5FGV1b/qr.jpg" width="100%">
+        </div>
+        <input type="number" class="input-box" id="depInput" placeholder="ENTER AMOUNT">
+        <button class="btn btn-start" onclick="payViaApp()">PAY VIA UPI APP</button>
+        <button class="btn btn-dep" onclick="submitRequest()">SUBMIT REQUEST</button>
+        <button class="btn-dep" style="border:none;" onclick="closeSheet('depSheet')">CLOSE</button>
+    </div>
+
     <div id="betSheet" class="sheet">
         <h2 style="text-align:center; margin-bottom:15px; color:var(--neon-gold);">PLACE BET</h2>
-        <input type="number" class="input-box" id="betInput" placeholder="ENTER AMOUNT">
-        <button class="btn btn-start" onclick="confirmBet()">CONFIRM BET</button>
+        <input type="number" class="input-box" id="betInput" placeholder="AMOUNT">
+        <button class="btn btn-start" onclick="confirmBet()">CONFIRM</button>
         <button class="btn btn-dep" onclick="closeSheet('betSheet')">CANCEL</button>
     </div>
 
-    <div id="depSheet" class="sheet">
-        <h2 style="text-align:center; margin-bottom:10px; color:white;">ADD CASH VIA UPI</h2>
-        <input type="number" class="input-box" id="depInput" placeholder="MIN ₹10">
-        <button class="btn btn-start" onclick="processUPI()">PAY NOW</button>
-        <button class="btn btn-dep" onclick="closeSheet('depSheet')">CLOSE</button>
-    </div>
-
     <div class="overlay" id="resOverlay">
-        <div class="res-glow" id="resContent"></div>
+        <div id="resContent" class="res-glow"></div>
         <div id="winMsg" style="margin-top:20px; font-size:28px; color:var(--win-green); font-weight:900; display:none;">YOU WON!</div>
     </div>
 
     <script>
-        // --- Firebase Config ---
+        // --- Firebase ---
         const firebaseConfig = {
             apiKey: "AIzaSyDpTNE2TzTaLpg9xZubA2PELS8E935CkDQ",
             authDomain: "club-1b615.firebaseapp.com",
             projectId: "club-1b615",
+            databaseURL: "https://club-1b615-default-rtdb.firebaseio.com/",
             storageBucket: "club-1b615.firebasestorage.app",
             messagingSenderId: "505101100809",
-            appId: "1:505101100809:web:15f5eac09494a0c05f55d8",
-            measurementId: "G-GDMW8N3N5W"
+            appId: "1:505101100809:web:15f5eac09494a0c05f55d8"
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(), db = firebase.database();
 
-        // --- Variables ---
+        const adminEmail = "YOUR_EMAIL@gmail.com"; // <--- अपनी ईमेल यहाँ डालें
+
         const icons = ["Umbrella", "Soccer ball", "Sun", "Diya lamp", "Cow", "Bucket", "Kite", "Yo-yo", "Rose", "Butterfly", "Dove", "Rabbit"];
         let wallet = 0, bets = Array(12).fill(0), currentIdx = null;
-        const sndTik = document.getElementById('sndTik'), sndWon = document.getElementById('sndWon'), sndClick = document.getElementById('sndClick');
 
-        // --- Auth Logic ---
+        // --- Auth ---
         function handleAuth() {
-            const email = document.getElementById('authEmail').value, pass = document.getElementById('authPass').value;
-            if(!email || !pass) return alert("Enter Details");
-            auth.createUserWithEmailAndPassword(email, pass).catch(err => {
-                if(err.code === 'auth/email-already-in-use') auth.signInWithEmailAndPassword(email, pass);
-                else alert(err.message);
-            });
+            const e = document.getElementById('authEmail').value, p = document.getElementById('authPass').value;
+            auth.createUserWithEmailAndPassword(e, p).catch(err => auth.signInWithEmailAndPassword(e, p));
         }
         function handleGoogleAuth() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-        function logout() { auth.signOut(); }
-
+        
         auth.onAuthStateChanged(user => {
             if(user) {
                 document.getElementById('authScreen').style.display = 'none';
                 document.getElementById('gameScreen').style.display = 'flex';
-                document.getElementById('userDisplayName').innerText = "Logged in as: " + (user.displayName || user.email);
                 db.ref('users/' + user.uid + '/wallet').on('value', snap => {
                     wallet = snap.val() || 0;
                     document.getElementById('balText').innerText = wallet.toFixed(2);
@@ -152,79 +140,104 @@
                 render();
             } else {
                 document.getElementById('authScreen').style.display = 'flex';
-                document.getElementById('gameScreen').style.display = 'none';
             }
         });
 
-        // --- Game Core ---
+        // --- UPI & Deposit ---
+        function payViaApp() {
+            const amt = document.getElementById('depInput').value;
+            if(amt < 10) return alert("Min ₹10");
+            const upiId = "BHARATPE.8L0B1D1M9V57945@fbpe";
+            const upiUrl = `upi://pay?pa=${upiId}&pn=99Club&am=${amt}&cu=INR`;
+            window.location.href = upiUrl;
+        }
+
+        function submitRequest() {
+            const amt = document.getElementById('depInput').value;
+            if(!amt) return alert("Enter amount paid");
+            db.ref('deposit_requests/' + auth.currentUser.uid).set({
+                email: auth.currentUser.email,
+                amount: parseInt(amt),
+                status: 'pending'
+            });
+            alert("Request sent! Admin verify karke balance add karega.");
+            closeSheet('depSheet');
+        }
+
+        // --- Admin Panel ---
+        function openAdmin() {
+            if(auth.currentUser.email === adminEmail) {
+                document.getElementById('adminPanel').style.display = 'block';
+                loadRequests();
+            }
+        }
+        function closeAdmin() { document.getElementById('adminPanel').style.display = 'none'; }
+
+        function loadRequests() {
+            db.ref('deposit_requests').on('value', snap => {
+                const list = document.getElementById('adminList');
+                list.innerHTML = '';
+                snap.forEach(child => {
+                    const d = child.val();
+                    list.innerHTML += `<div class="req-card">
+                        <p>${d.email}</p><p>Amt: ₹${d.amount}</p>
+                        <button class="btn btn-start" style="padding:5px; margin-top:5px;" onclick="approve('${child.key}', ${d.amount})">Approve</button>
+                        <button class="btn btn-dep" style="padding:5px; border-color:red; color:red;" onclick="reject('${child.key}')">Reject</button>
+                    </div>`;
+                });
+            });
+        }
+
+        function approve(uid, amt) {
+            db.ref('users/' + uid + '/wallet').once('value', s => {
+                db.ref('users/' + uid).update({ wallet: (s.val() || 0) + amt });
+                db.ref('deposit_requests/' + uid).remove();
+            });
+        }
+        function reject(uid) { db.ref('deposit_requests/' + uid).remove(); }
+
+        // --- Game Logic ---
         function render() {
             const g = document.getElementById('gameGrid'); g.innerHTML = '';
             icons.forEach((name, i) => {
                 const p = `https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/${name.replace(' ', '%20')}/3D/${name.toLowerCase().replace(' ', '_')}_3d.png`;
-                g.innerHTML += `
-                    <div class="box-unit">
-                        <div class="box" onclick="openBet(${i})"><img src="${p}"></div>
-                        <div class="bet-info">₹${bets[i]}</div>
-                    </div>`;
+                g.innerHTML += `<div class="box-unit"><div class="box" onclick="openBet(${i})"><img src="${p}"></div><div class="bet-info">₹${bets[i]}</div></div>`;
             });
         }
 
-        function openBet(i) { sndClick.play(); currentIdx = i; openSheet('betSheet'); }
+        function openBet(i) { currentIdx = i; openSheet('betSheet'); }
         function openSheet(id) { document.getElementById(id).style.bottom = '0'; }
         function closeSheet(id) { document.getElementById(id).style.bottom = '-100%'; }
 
         function confirmBet() {
-            const val = parseInt(document.getElementById('betInput').value) || 0;
-            if(val < 10) return alert("Min bet ₹10");
-            if(val > wallet) return alert("Low Balance!");
-            
-            bets[currentIdx] += val;
-            updateDBWallet(wallet - val);
+            const v = parseInt(document.getElementById('betInput').value) || 0;
+            if(v > wallet || v < 10) return alert("Check balance (Min ₹10)");
+            bets[currentIdx] += v;
+            db.ref('users/' + auth.currentUser.uid).update({ wallet: wallet - v });
             closeSheet('betSheet'); render();
-            document.getElementById('betInput').value = '';
         }
-
-        function processUPI() {
-            const amt = document.getElementById('depInput').value;
-            if(amt < 10) return alert("Min ₹10");
-            const upiUrl = `upi://pay?pa=YOUR-UPI-ID@okaxis&pn=99Club&am=${amt}&cu=INR`;
-            window.location.href = upiUrl;
-            setTimeout(() => { 
-                updateDBWallet(wallet + parseInt(amt)); 
-                closeSheet('depSheet'); alert("Deposit Request Sent!"); 
-            }, 4000);
-        }
-
-        function updateDBWallet(newBal) { db.ref('users/' + auth.currentUser.uid).update({ wallet: newBal }); }
 
         function startBattle() {
             if(bets.every(b => b === 0)) return alert("Bet lagayein!");
             document.getElementById('startBtn').disabled = true;
             let t = 5;
             const timer = setInterval(() => {
-                t--; sndTik.play();
-                document.getElementById('timerDisp').innerText = `00:0${t}`;
+                t--; document.getElementById('timerDisp').innerText = `00:0${t}`;
                 if(t <= 0) { clearInterval(timer); finish(); }
             }, 1000);
         }
 
         function finish() {
             const winIdx = Math.floor(Math.random() * 12);
-            const winName = icons[winIdx];
-            const p = `https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/${winName.replace(' ', '%20')}/3D/${winName.toLowerCase().replace(' ', '_')}_3d.png`;
-            
+            const p = `https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/${icons[winIdx].replace(' ', '%20')}/3D/${icons[winIdx].toLowerCase().replace(' ', '_')}_3d.png`;
             document.getElementById('resContent').innerHTML = `<img src="${p}" style="width:75%;">`;
             document.getElementById('resOverlay').style.display = 'flex';
-
             if(bets[winIdx] > 0) {
-                sndWon.play();
                 document.getElementById('winMsg').style.display = 'block';
-                updateDBWallet(wallet + (bets[winIdx] * 2));
+                db.ref('users/' + auth.currentUser.uid).update({ wallet: wallet + (bets[winIdx] * 2) });
             }
-
             setTimeout(() => {
                 document.getElementById('resOverlay').style.display = 'none';
-                document.getElementById('winMsg').style.display = 'none';
                 bets = Array(12).fill(0);
                 document.getElementById('timerDisp').innerText = "00:05";
                 document.getElementById('startBtn').disabled = false;
