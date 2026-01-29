@@ -1,4 +1,4 @@
-<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-analytics-compat.js"></script>
 
     <style>
         :root { --neon-red: #ff003c; --neon-gold: #ffcc00; --bg-dark: #050505; --win-green: #00ff88; }
@@ -37,8 +38,6 @@
             width: 100%; padding: 12px; background: linear-gradient(45deg, var(--neon-red), #990024);
             border: none; border-radius: 10px; color: white; font-weight: 800; cursor: pointer; margin-bottom: 10px;
         }
-        
-        /* Google Button Style */
         .btn-google {
             width: 100%; padding: 12px; background: white; color: #444;
             border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
@@ -51,7 +50,6 @@
         .toolbar { background: #000; height: 65px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 2px solid var(--neon-red); }
         .main-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; overflow-y: auto; }
         .box { background: #111; border: 1.5px solid #222; border-radius: 15px; padding: 10px; text-align: center; position: relative; }
-        .box.active { border-color: var(--neon-red); background: rgba(255,0,60,0.1); }
         .bet-tag { position: absolute; top: 5px; right: 5px; background: var(--neon-gold); color: black; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 5px; }
         .sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #111; border-top: 3px solid var(--neon-red); border-radius: 25px 25px 0 0; padding: 20px; transition: 0.4s; z-index: 1000; }
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
@@ -62,7 +60,6 @@
     <div id="authScreen">
         <div class="login-card">
             <div class="logo-large">99 CLUB</div>
-            
             <div class="input-group">
                 <i class="fas fa-envelope"></i>
                 <input type="email" id="authEmail" placeholder="Email Address">
@@ -71,16 +68,12 @@
                 <i class="fas fa-lock"></i>
                 <input type="password" id="authPass" placeholder="Password">
             </div>
-            
             <button class="btn-auth" onclick="handleEmailAuth()">LOGIN / REGISTER</button>
-            
             <div style="margin: 15px 0; color: #555; font-size: 12px;">OR</div>
-            
             <button class="btn-google" onclick="handleGoogleAuth()">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18">
                 Sign in with Google
             </button>
-
             <p id="authMsg" style="margin-top: 15px; font-size: 12px; color: #888;"></p>
         </div>
     </div>
@@ -91,20 +84,18 @@
             <div style="background:#1a1a1a; padding:8px 15px; border-radius:20px; border:1px solid #333;">
                 <span style="color:var(--neon-gold); font-weight:bold;">₹ <span id="balText">0.00</span></span>
             </div>
-            <i class="fas fa-sign-out-alt" onclick="logout()" style="color:var(--neon-red)"></i>
+            <i class="fas fa-sign-out-alt" onclick="logout()" style="color:var(--neon-red); cursor:pointer;"></i>
         </div>
-
         <div style="padding:15px; display:flex; justify-content:space-between; align-items:center;">
             <div id="timerDisp" style="font-family:'Orbitron'; font-size:24px; color:var(--neon-red);">00:05</div>
             <button onclick="startBattle()" id="startBtn" style="background:var(--neon-red); color:white; border:none; padding:10px 20px; border-radius:10px; font-weight:bold;">START BATTLE</button>
         </div>
-
         <div class="main-grid" id="grid"></div>
     </div>
 
     <div id="betSheet" class="sheet">
         <h3 id="sheetTitle" style="color:var(--neon-gold); margin-bottom:15px;">PLACE BET</h3>
-        <input type="number" id="betAmt" placeholder="Enter Amount" style="width:100%; padding:15px; background:#222; border:none; border-radius:10px; color:white; margin-bottom:15px;">
+        <input type="number" id="betAmt" placeholder="Enter Amount" style="width:100%; padding:15px; background:#222; border:none; border-radius:10px; color:white; margin-bottom:15px; outline:none;">
         <button class="btn-auth" onclick="confirmBet()">CONFIRM BET</button>
         <button onclick="closeSheet()" style="width:100%; background:none; border:none; color:#555; margin-top:10px;">CANCEL</button>
     </div>
@@ -116,20 +107,22 @@
     </div>
 
     <script>
-        // --- Firebase Config (Replace with your actual keys) ---
+        // --- YOUR CONNECTED FIREBASE CONFIG ---
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            databaseURL: "YOUR_DATABASE_URL",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+          apiKey: "AIzaSyDpTNE2TzTaLpg9xZubA2PELS8E935CkDQ",
+          authDomain: "club-1b615.firebaseapp.com",
+          projectId: "club-1b615",
+          storageBucket: "club-1b615.firebasestorage.app",
+          messagingSenderId: "505101100809",
+          appId: "1:505101100809:web:15f5eac09494a0c05f55d8",
+          measurementId: "G-GDMW8N3N5W"
         };
 
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
+        const analytics = firebase.analytics();
 
         let wallet = 0.00;
         let bets = Array(12).fill(0);
@@ -137,12 +130,10 @@
         const icons = ["Umbrella", "Cow", "Rose", "Elephant", "Sun", "Bird", "Butterfly", "Lamp", "Kite", "Spinning Top", "Hen", "Fish"];
 
         // --- AUTH LOGIC ---
-
-        // 1. Email Login/Signup
         function handleEmailAuth() {
             const email = document.getElementById('authEmail').value;
             const pass = document.getElementById('authPass').value;
-            if(!email || !pass) return alert("Fill all fields");
+            if(!email || !pass) return alert("Please enter email and password");
 
             auth.createUserWithEmailAndPassword(email, pass)
                 .then(res => initializeUser(res.user.uid))
@@ -153,21 +144,17 @@
                 });
         }
 
-        // 2. Google Login
         function handleGoogleAuth() {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider)
-                .then((result) => {
-                    initializeUser(result.user.uid);
-                })
+                .then((result) => initializeUser(result.user.uid))
                 .catch((error) => alert(error.message));
         }
 
-        // 3. New User Init
         function initializeUser(uid) {
             db.ref('users/' + uid).once('value', snap => {
                 if(!snap.exists()) {
-                    db.ref('users/' + uid).set({ wallet: 100 }); // New user gift
+                    db.ref('users/' + uid).set({ wallet: 100 }); // Initial bonus
                 }
             });
         }
@@ -184,6 +171,7 @@
                     wallet = snap.val() || 0;
                     document.getElementById('balText').innerText = wallet.toFixed(2);
                 });
+                render();
             } else {
                 document.getElementById('authScreen').style.display = 'flex';
                 document.getElementById('gameScreen').style.display = 'none';
@@ -211,13 +199,14 @@
 
         function confirmBet() {
             const amt = parseInt(document.getElementById('betAmt').value);
-            if(amt > wallet) return alert("Inadequate Balance");
-            if(amt < 10) return alert("Min bet ₹10");
+            if(!amt || amt < 10) return alert("Minimum bet is ₹10");
+            if(amt > wallet) return alert("Insufficient balance");
 
             bets[selectedIdx] += amt;
             updateFirebaseWallet(wallet - amt);
             closeSheet();
             render();
+            document.getElementById('betAmt').value = '';
         }
 
         function updateFirebaseWallet(newVal) {
@@ -225,6 +214,7 @@
         }
 
         function startBattle() {
+            if(bets.every(b => b === 0)) return alert("Please place a bet first!");
             let time = 5;
             document.getElementById('startBtn').disabled = true;
             const loop = setInterval(() => {
@@ -244,7 +234,8 @@
 
             if(bets[winIdx] > 0) {
                 document.getElementById('winMsg').style.display = 'block';
-                updateFirebaseWallet(wallet + (bets[winIdx] * 2));
+                const winnings = bets[winIdx] * 2;
+                updateFirebaseWallet(wallet + winnings);
             }
 
             setTimeout(() => {
@@ -256,8 +247,6 @@
                 render();
             }, 4000);
         }
-
-        render();
     </script>
 </body>
 </html>
