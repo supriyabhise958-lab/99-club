@@ -3,170 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>99 CLUB - PRO AUTH + GOOGLE</title>
+    <title>99 CLUB - PRO REAL MONEY</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-analytics-compat.js"></script>
 
     <style>
         :root { --neon-red: #ff003c; --neon-gold: #ffcc00; --bg-dark: #050505; --win-green: #00ff88; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; user-select: none; }
-        body { background-color: var(--bg-dark); color: white; overflow-x: hidden; height: 100vh; }
+        body { background-color: var(--bg-dark); color: white; overflow-x: hidden; height: 100vh; display: flex; flex-direction: column; }
 
-        /* --- Auth UI --- */
-        #authScreen { 
-            position: fixed; inset: 0; z-index: 9999; background: var(--bg-dark);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .login-card {
-            width: 90%; max-width: 380px; background: #111; padding: 30px;
-            border-radius: 20px; border: 1px solid #333; text-align: center;
-            box-shadow: 0 0 20px rgba(255, 0, 60, 0.2);
-        }
-        .logo-large { font-family: 'Orbitron', sans-serif; font-size: 32px; color: var(--neon-red); margin-bottom: 25px; }
+        /* --- Auth Screen --- */
+        #authScreen { position: fixed; inset: 0; z-index: 9999; background: var(--bg-dark); display: flex; align-items: center; justify-content: center; }
+        .login-card { width: 90%; max-width: 380px; background: #111; padding: 30px; border-radius: 20px; border: 1px solid #333; text-align: center; box-shadow: 0 0 20px rgba(255, 0, 60, 0.2); }
         .input-group { position: relative; margin-bottom: 15px; }
         .input-group i { position: absolute; left: 15px; top: 14px; color: #555; }
-        .input-group input {
-            width: 100%; background: #1a1a1a; border: 1px solid #333; padding: 12px 12px 12px 45px;
-            border-radius: 10px; color: white; font-size: 16px; outline: none;
-        }
-        .btn-auth {
-            width: 100%; padding: 12px; background: linear-gradient(45deg, var(--neon-red), #990024);
-            border: none; border-radius: 10px; color: white; font-weight: 800; cursor: pointer; margin-bottom: 10px;
-        }
-        .btn-google {
-            width: 100%; padding: 12px; background: white; color: #444;
-            border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s;
-        }
-        .btn-google:active { transform: scale(0.98); background: #eee; }
+        .input-group input { width: 100%; background: #1a1a1a; border: 1px solid #333; padding: 12px 12px 12px 45px; border-radius: 10px; color: white; outline: none; }
+        
+        /* --- Toolbar --- */
+        .toolbar { background: #000; height: 65px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 2px solid var(--neon-red); box-shadow: 0 0 20px var(--neon-red); flex-shrink: 0; }
+        .logo { font-family: 'Orbitron', sans-serif; font-size: 22px; text-shadow: 0 0 10px var(--neon-red); }
+        .wallet-card { background: rgba(255,255,255,0.05); padding: 8px 18px; border-radius: 30px; border: 1.5px solid var(--neon-gold); display: flex; align-items: center; gap: 8px; }
 
-        /* --- Game UI --- */
-        #gameScreen { display: none; height: 100%; flex-direction: column; }
-        .toolbar { background: #000; height: 65px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 2px solid var(--neon-red); }
-        .main-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; overflow-y: auto; }
-        .box { background: #111; border: 1.5px solid #222; border-radius: 15px; padding: 10px; text-align: center; position: relative; }
-        .bet-tag { position: absolute; top: 5px; right: 5px; background: var(--neon-gold); color: black; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 5px; }
-        .sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #111; border-top: 3px solid var(--neon-red); border-radius: 25px 25px 0 0; padding: 20px; transition: 0.4s; z-index: 1000; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
+        /* --- Game Grid --- */
+        .main-content { flex-grow: 1; overflow-y: auto; padding-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 15px; max-width: 500px; margin: 0 auto; }
+        .box-unit { display: flex; flex-direction: column; align-items: center; }
+        .box { background: #fff; border: 2.5px solid var(--neon-gold); aspect-ratio: 1/1; width: 100%; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .box img { width: 75%; }
+        .bet-info { font-size: 13px; font-weight: 700; color: var(--neon-gold); margin-top: 5px; text-align: center; }
+
+        /* --- Panel --- */
+        .panel { background: #111; margin: 10px auto; width: 92%; border-radius: 25px; padding: 20px; text-align: center; border: 1px solid #333; flex-shrink: 0; }
+        .timer { font-family: 'Orbitron', sans-serif; font-size: 40px; color: var(--neon-gold); margin-bottom: 10px; }
+        .btn { width: 100%; padding: 14px; border-radius: 35px; font-weight: 700; text-transform: uppercase; cursor: pointer; border: none; margin-bottom: 8px; font-size: 14px; }
+        .btn-start { background: linear-gradient(90deg, #ff003c, #990024); color: white; box-shadow: 0 0 15px var(--neon-red); }
+        .btn-dep { background: transparent; color: white; border: 1.5px solid var(--neon-gold); }
+
+        /* --- Sheets --- */
+        .sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #0a0a0a; z-index: 6000; border-radius: 30px 30px 0 0; padding: 25px; transition: 0.5s; border-top: 3px solid var(--neon-red); }
+        .input-box { width: 100%; background: #1a1a1a; border: 1px solid #444; padding: 15px; border-radius: 12px; color: var(--neon-gold); font-size: 24px; text-align: center; margin-bottom: 15px; outline: none; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 7000; }
+        .res-glow { width: 200px; height: 200px; border: 5px solid var(--neon-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px var(--neon-gold); }
     </style>
 </head>
 <body>
 
+    <audio id="sndTik" src="https://www.soundjay.com/clock/sounds/clock-ticking-2.mp3"></audio>
+    <audio id="sndWon" src="https://www.soundjay.com/human/sounds/applause-01.mp3"></audio>
+    <audio id="sndClick" src="https://www.soundjay.com/buttons/sounds/button-20.mp3"></audio>
+
     <div id="authScreen">
         <div class="login-card">
-            <div class="logo-large">99 CLUB</div>
-            <div class="input-group">
-                <i class="fas fa-envelope"></i>
-                <input type="email" id="authEmail" placeholder="Email Address">
-            </div>
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="authPass" placeholder="Password">
-            </div>
-            <button class="btn-auth" onclick="handleEmailAuth()">LOGIN / REGISTER</button>
-            <div style="margin: 15px 0; color: #555; font-size: 12px;">OR</div>
-            <button class="btn-google" onclick="handleGoogleAuth()">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18">
-                Sign in with Google
+            <div class="logo" style="font-size: 32px; margin-bottom: 25px;">99 CLUB</div>
+            <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="authEmail" placeholder="Email Address"></div>
+            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="authPass" placeholder="Password"></div>
+            <button class="btn btn-start" onclick="handleAuth()">LOGIN / REGISTER</button>
+            <div style="margin: 10px 0; color: #555;">OR</div>
+            <button class="btn-dep" style="width:100%; padding:10px; border-radius:10px;" onclick="handleGoogleAuth()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="15"> Sign in with Google
             </button>
-            <p id="authMsg" style="margin-top: 15px; font-size: 12px; color: #888;"></p>
         </div>
     </div>
 
-    <div id="gameScreen">
-        <div class="toolbar">
-            <div id="userLabel" style="color:var(--neon-gold); font-size:14px; font-weight:bold;">...</div>
-            <div style="background:#1a1a1a; padding:8px 15px; border-radius:20px; border:1px solid #333;">
-                <span style="color:var(--neon-gold); font-weight:bold;">₹ <span id="balText">0.00</span></span>
+    <div id="gameScreen" style="display:none; flex-direction: column; height: 100%;">
+        <header class="toolbar">
+            <div class="logo">99 CLUB</div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div class="wallet-card">₹<span id="balText">0.00</span></div>
+                <i class="fas fa-sign-out-alt" onclick="logout()" style="color:var(--neon-red); font-size: 20px;"></i>
             </div>
-            <i class="fas fa-sign-out-alt" onclick="logout()" style="color:var(--neon-red); cursor:pointer;"></i>
+        </header>
+
+        <div class="main-content">
+            <div id="userDisplayName" style="text-align:center; padding:10px; color:var(--neon-gold); font-size:12px;">Welcome, User</div>
+            <div class="grid" id="gameGrid"></div>
         </div>
-        <div style="padding:15px; display:flex; justify-content:space-between; align-items:center;">
-            <div id="timerDisp" style="font-family:'Orbitron'; font-size:24px; color:var(--neon-red);">00:05</div>
-            <button onclick="startBattle()" id="startBtn" style="background:var(--neon-red); color:white; border:none; padding:10px 20px; border-radius:10px; font-weight:bold;">START BATTLE</button>
+
+        <div class="panel">
+            <div class="timer" id="timerDisp">00:05</div>
+            <button class="btn btn-start" id="startBtn" onclick="startBattle()">START BATTLE</button>
+            <button class="btn btn-dep" onclick="openSheet('depSheet')">DEPOSIT (REAL MONEY)</button>
         </div>
-        <div class="main-grid" id="grid"></div>
     </div>
 
     <div id="betSheet" class="sheet">
-        <h3 id="sheetTitle" style="color:var(--neon-gold); margin-bottom:15px;">PLACE BET</h3>
-        <input type="number" id="betAmt" placeholder="Enter Amount" style="width:100%; padding:15px; background:#222; border:none; border-radius:10px; color:white; margin-bottom:15px; outline:none;">
-        <button class="btn-auth" onclick="confirmBet()">CONFIRM BET</button>
-        <button onclick="closeSheet()" style="width:100%; background:none; border:none; color:#555; margin-top:10px;">CANCEL</button>
+        <h2 style="text-align:center; margin-bottom:15px; color:var(--neon-gold);">PLACE BET</h2>
+        <input type="number" class="input-box" id="betInput" placeholder="ENTER AMOUNT">
+        <button class="btn btn-start" onclick="confirmBet()">CONFIRM BET</button>
+        <button class="btn btn-dep" onclick="closeSheet('betSheet')">CANCEL</button>
     </div>
 
-    <div id="resOverlay" class="overlay">
-        <h1 style="font-family:Orbitron; color:var(--neon-gold); margin-bottom:20px;">WINNER</h1>
-        <div id="resContent" style="width:200px; height:200px; display:flex; align-items:center; justify-content:center;"></div>
-        <h2 id="winMsg" style="color:var(--win-green); margin-top:20px; display:none;">YOU WON!</h2>
+    <div id="depSheet" class="sheet">
+        <h2 style="text-align:center; margin-bottom:10px; color:white;">ADD CASH VIA UPI</h2>
+        <input type="number" class="input-box" id="depInput" placeholder="MIN ₹10">
+        <button class="btn btn-start" onclick="processUPI()">PAY NOW</button>
+        <button class="btn btn-dep" onclick="closeSheet('depSheet')">CLOSE</button>
+    </div>
+
+    <div class="overlay" id="resOverlay">
+        <div class="res-glow" id="resContent"></div>
+        <div id="winMsg" style="margin-top:20px; font-size:28px; color:var(--win-green); font-weight:900; display:none;">YOU WON!</div>
     </div>
 
     <script>
-        // --- YOUR CONNECTED FIREBASE CONFIG ---
+        // --- Firebase Config ---
         const firebaseConfig = {
-          apiKey: "AIzaSyDpTNE2TzTaLpg9xZubA2PELS8E935CkDQ",
-          authDomain: "club-1b615.firebaseapp.com",
-          projectId: "club-1b615",
-          storageBucket: "club-1b615.firebasestorage.app",
-          messagingSenderId: "505101100809",
-          appId: "1:505101100809:web:15f5eac09494a0c05f55d8",
-          measurementId: "G-GDMW8N3N5W"
+            apiKey: "AIzaSyDpTNE2TzTaLpg9xZubA2PELS8E935CkDQ",
+            authDomain: "club-1b615.firebaseapp.com",
+            projectId: "club-1b615",
+            storageBucket: "club-1b615.firebasestorage.app",
+            messagingSenderId: "505101100809",
+            appId: "1:505101100809:web:15f5eac09494a0c05f55d8",
+            measurementId: "G-GDMW8N3N5W"
         };
-
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
-        const analytics = firebase.analytics();
+        const auth = firebase.auth(), db = firebase.database();
 
-        let wallet = 0.00;
-        let bets = Array(12).fill(0);
-        let selectedIdx = null;
-        const icons = ["Umbrella", "Cow", "Rose", "Elephant", "Sun", "Bird", "Butterfly", "Lamp", "Kite", "Spinning Top", "Hen", "Fish"];
+        // --- Variables ---
+        const icons = ["Umbrella", "Soccer ball", "Sun", "Diya lamp", "Cow", "Bucket", "Kite", "Yo-yo", "Rose", "Butterfly", "Dove", "Rabbit"];
+        let wallet = 0, bets = Array(12).fill(0), currentIdx = null;
+        const sndTik = document.getElementById('sndTik'), sndWon = document.getElementById('sndWon'), sndClick = document.getElementById('sndClick');
 
-        // --- AUTH LOGIC ---
-        function handleEmailAuth() {
-            const email = document.getElementById('authEmail').value;
-            const pass = document.getElementById('authPass').value;
-            if(!email || !pass) return alert("Please enter email and password");
-
-            auth.createUserWithEmailAndPassword(email, pass)
-                .then(res => initializeUser(res.user.uid))
-                .catch(err => {
-                    if(err.code === 'auth/email-already-in-use') {
-                        auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
-                    } else { alert(err.message); }
-                });
-        }
-
-        function handleGoogleAuth() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-                .then((result) => initializeUser(result.user.uid))
-                .catch((error) => alert(error.message));
-        }
-
-        function initializeUser(uid) {
-            db.ref('users/' + uid).once('value', snap => {
-                if(!snap.exists()) {
-                    db.ref('users/' + uid).set({ wallet: 100 }); // Initial bonus
-                }
+        // --- Auth Logic ---
+        function handleAuth() {
+            const email = document.getElementById('authEmail').value, pass = document.getElementById('authPass').value;
+            if(!email || !pass) return alert("Enter Details");
+            auth.createUserWithEmailAndPassword(email, pass).catch(err => {
+                if(err.code === 'auth/email-already-in-use') auth.signInWithEmailAndPassword(email, pass);
+                else alert(err.message);
             });
         }
-
+        function handleGoogleAuth() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
         function logout() { auth.signOut(); }
 
         auth.onAuthStateChanged(user => {
             if(user) {
                 document.getElementById('authScreen').style.display = 'none';
                 document.getElementById('gameScreen').style.display = 'flex';
-                document.getElementById('userLabel').innerText = user.displayName || user.email.split('@')[0];
-                
+                document.getElementById('userDisplayName').innerText = "Logged in as: " + (user.displayName || user.email);
                 db.ref('users/' + user.uid + '/wallet').on('value', snap => {
                     wallet = snap.val() || 0;
                     document.getElementById('balText').innerText = wallet.toFixed(2);
@@ -178,49 +156,55 @@
             }
         });
 
-        // --- GAME LOGIC ---
+        // --- Game Core ---
         function render() {
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
+            const g = document.getElementById('gameGrid'); g.innerHTML = '';
             icons.forEach((name, i) => {
-                const path = `https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/${name.replace(' ', '%20')}/3D/${name.toLowerCase().replace(' ', '_')}_3d.png`;
-                grid.innerHTML += `
-                    <div class="box" onclick="openSheet(${i})">
-                        ${bets[i] > 0 ? `<div class="bet-tag">₹${bets[i]}</div>` : ''}
-                        <img src="${path}" style="width:50px;">
-                        <div style="font-size:10px; color:#555; margin-top:5px;">${name.toUpperCase()}</div>
-                    </div>
-                `;
+                const p = `https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/${name.replace(' ', '%20')}/3D/${name.toLowerCase().replace(' ', '_')}_3d.png`;
+                g.innerHTML += `
+                    <div class="box-unit">
+                        <div class="box" onclick="openBet(${i})"><img src="${p}"></div>
+                        <div class="bet-info">₹${bets[i]}</div>
+                    </div>`;
             });
         }
 
-        function openSheet(i) { selectedIdx = i; document.getElementById('betSheet').style.bottom = '0'; }
-        function closeSheet() { document.getElementById('betSheet').style.bottom = '-100%'; }
+        function openBet(i) { sndClick.play(); currentIdx = i; openSheet('betSheet'); }
+        function openSheet(id) { document.getElementById(id).style.bottom = '0'; }
+        function closeSheet(id) { document.getElementById(id).style.bottom = '-100%'; }
 
         function confirmBet() {
-            const amt = parseInt(document.getElementById('betAmt').value);
-            if(!amt || amt < 10) return alert("Minimum bet is ₹10");
-            if(amt > wallet) return alert("Insufficient balance");
-
-            bets[selectedIdx] += amt;
-            updateFirebaseWallet(wallet - amt);
-            closeSheet();
-            render();
-            document.getElementById('betAmt').value = '';
+            const val = parseInt(document.getElementById('betInput').value) || 0;
+            if(val < 10) return alert("Min bet ₹10");
+            if(val > wallet) return alert("Low Balance!");
+            
+            bets[currentIdx] += val;
+            updateDBWallet(wallet - val);
+            closeSheet('betSheet'); render();
+            document.getElementById('betInput').value = '';
         }
 
-        function updateFirebaseWallet(newVal) {
-            db.ref('users/' + auth.currentUser.uid).update({ wallet: newVal });
+        function processUPI() {
+            const amt = document.getElementById('depInput').value;
+            if(amt < 10) return alert("Min ₹10");
+            const upiUrl = `upi://pay?pa=YOUR-UPI-ID@okaxis&pn=99Club&am=${amt}&cu=INR`;
+            window.location.href = upiUrl;
+            setTimeout(() => { 
+                updateDBWallet(wallet + parseInt(amt)); 
+                closeSheet('depSheet'); alert("Deposit Request Sent!"); 
+            }, 4000);
         }
+
+        function updateDBWallet(newBal) { db.ref('users/' + auth.currentUser.uid).update({ wallet: newBal }); }
 
         function startBattle() {
-            if(bets.every(b => b === 0)) return alert("Please place a bet first!");
-            let time = 5;
+            if(bets.every(b => b === 0)) return alert("Bet lagayein!");
             document.getElementById('startBtn').disabled = true;
-            const loop = setInterval(() => {
-                time--;
-                document.getElementById('timerDisp').innerText = `00:0${time}`;
-                if(time <= 0) { clearInterval(loop); finish(); }
+            let t = 5;
+            const timer = setInterval(() => {
+                t--; sndTik.play();
+                document.getElementById('timerDisp').innerText = `00:0${t}`;
+                if(t <= 0) { clearInterval(timer); finish(); }
             }, 1000);
         }
 
@@ -229,13 +213,13 @@
             const winName = icons[winIdx];
             const p = `https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/${winName.replace(' ', '%20')}/3D/${winName.toLowerCase().replace(' ', '_')}_3d.png`;
             
-            document.getElementById('resContent').innerHTML = `<img src="${p}" style="width:100px;">`;
+            document.getElementById('resContent').innerHTML = `<img src="${p}" style="width:75%;">`;
             document.getElementById('resOverlay').style.display = 'flex';
 
             if(bets[winIdx] > 0) {
+                sndWon.play();
                 document.getElementById('winMsg').style.display = 'block';
-                const winnings = bets[winIdx] * 2;
-                updateFirebaseWallet(wallet + winnings);
+                updateDBWallet(wallet + (bets[winIdx] * 2));
             }
 
             setTimeout(() => {
